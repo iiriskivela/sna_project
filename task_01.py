@@ -2,6 +2,11 @@ import csv
 import gzip
 from datetime import datetime, timezone
 
+
+# 1. Use the timestamp attribute to restrict the collection to Twitter data in the period October 2019-December 2019
+# Limited to only 30 rows because otherwise too slow to test
+# Jos testaa, pitää vaa muokata polku twitter dataan että löytyy
+
 # Define the start and end dates for the period of interest in UTC timezone
 start_date = datetime(2019, 10, 1, tzinfo=timezone.utc)
 end_date = datetime(2019, 12, 31, 23, 59, 59, tzinfo=timezone.utc)
