@@ -168,6 +168,7 @@ plt.title('Fitted Polynomial Curve for Positive Sentiment Tweets')
 plt.grid(True)
 plt.show()
 
+# 9
 # Count negative sentiment tweets for each interval
 for timestamp, sentiment in zip(timestamps, negative_sentiments):
     interval_index = (timestamp - min_timestamp) // time_interval
