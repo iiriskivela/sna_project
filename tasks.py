@@ -7,7 +7,6 @@ import powerlaw
 from sentimentfunction import calculate_sentiment_connection_proportion
 from scipy.optimize import curve_fit
 # 1
-# Limited to only 30 rows because otherwise too slow to test
 # Jos testaa, pitää vaa muokata polku twitter dataan että löytyy
 
 start_date = datetime(2019, 10, 1, tzinfo=timezone.utc)
