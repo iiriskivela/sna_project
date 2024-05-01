@@ -17,6 +17,8 @@ G = nx.Graph()
 shared_hashtags = {}
 sentiment_scores = {}
 timestamps = []
+timestamps_pos = []
+timestamps_neg = []
 positive_sentiments = []
 negative_sentiments = []
 
@@ -37,7 +39,7 @@ with open(r'C:\Users\joh55\Downloads\TweetsCOV19.tsv\TweetsCOV19.tsv', 'rb') as 
 
         
             if start_date <= timestamp <= end_date:
-                #if line_num >= 50:
+                #if line_num >= 4:
                     timestamps.append(timestamp)
                     
                     filtered_rows.append(fields)
@@ -52,6 +54,13 @@ with open(r'C:\Users\joh55\Downloads\TweetsCOV19.tsv\TweetsCOV19.tsv', 'rb') as 
                     #print("Overall Sentiment Score:", overall_sentiment)
                     positive_sentiments.append(positive_sentiment)
                     negative_sentiments.append(negative_sentiment)
+                    #####added
+                    if(overall_sentiment > 0):
+                         timestamps_pos.append(timestamp)
+                    
+                    if(overall_sentiment < 0):
+                         timestamps_neg.append(timestamp)
+                    ######added
 
                     for i, hashtag in enumerate(hashtags):
                         if hashtag != "null;":
@@ -69,8 +78,8 @@ with open(r'C:\Users\joh55\Downloads\TweetsCOV19.tsv\TweetsCOV19.tsv', 'rb') as 
             number_of_lines += 1
 
             # If we have read x lines, break the loop
-            if number_of_lines >= 30000:
-                break
+            #if number_of_lines >= 900000:
+            #    break
         
 
 #for row in filtered_rows:
@@ -150,9 +159,9 @@ num_intervals = (max_timestamp - min_timestamp) // time_interval + 1
 positive_counts_per_interval = np.zeros(num_intervals)
 
 # Count positive sentiment tweets for each interval
-for timestamp, sentiment in zip(timestamps, positive_sentiments):
+for timestamp, sentiment in zip(timestamps_pos, positive_sentiments):
     interval_index = (timestamp - min_timestamp) // time_interval
-    positive_counts_per_interval[interval_index] += sentiment
+    positive_counts_per_interval[interval_index] += 1#sentiment
 
 time_points = [min_timestamp + i * time_interval for i in range(num_intervals)]
 plt.plot(time_points, positive_counts_per_interval)
@@ -181,9 +190,9 @@ plt.show()
 # 9
 # Count negative sentiment tweets for each interval
 negative_counts_per_interval = np.zeros(num_intervals)
-for timestamp, sentiment in zip(timestamps, negative_sentiments):
+for timestamp, sentiment in zip(timestamps_neg, negative_sentiments):
     interval_index = (timestamp - min_timestamp) // time_interval
-    negative_counts_per_interval[interval_index] -= sentiment
+    negative_counts_per_interval[interval_index] += 1#sentiment
 
 # Plot the evolution of the total number of negative sentiment tweets over time
 time_points = [min_timestamp + i * time_interval for i in range(num_intervals)]
