@@ -10,8 +10,8 @@ from scipy.optimize import curve_fit
 # Jos testaa, pitää vaa muokata polku twitter dataan että löytyy
 
 start_date = datetime(2019, 10, 1, tzinfo=timezone.utc)
-end_date = datetime(2019, 12, 31, 23, 59, 59, tzinfo=timezone.utc)
-
+#end_date = datetime(2019, 12, 31, 23, 59, 59, tzinfo=timezone.utc)
+end_date = datetime(2019, 12, 31, tzinfo=timezone.utc)
 # 2
 G = nx.Graph()
 shared_hashtags = {}
@@ -20,48 +20,58 @@ timestamps = []
 positive_sentiments = []
 negative_sentiments = []
 
-with gzip.open(r'c:\Users\35844\Downloads\TweetsCOV19.tsv.gz', 'rb') as f:
+line_num = 0
+
+with open(r'C:\Users\joh55\Downloads\TweetsCOV19.tsv\TweetsCOV19.tsv', 'rb') as f:
+#with gzip.open(r'c:\Users\35844\Downloads\TweetsCOV19.tsv.gz', 'rb') as f:
     filtered_rows = []
     number_of_lines = 0
 
     for line in f:
-        fields = line.decode().strip().split('\t')
+        
+            fields = line.decode().strip().split('\t')
 
-        timestamp_str = fields[2]
-        timestamp = datetime.strptime(timestamp_str, "%a %b %d %H:%M:%S %z %Y")
-        timestamps.append(timestamp)
+            timestamp_str = fields[2]
+            timestamp = datetime.strptime(timestamp_str, "%a %b %d %H:%M:%S %z %Y")
+            
 
-    
-        if start_date <= timestamp <= end_date:
-            filtered_rows.append(fields)
-            twitter_id = fields[0]
-            hashtags = fields[10].split()
-            sentiment_str = fields[8]
+        
+            if start_date <= timestamp <= end_date:
+                #if line_num >= 50:
+                    timestamps.append(timestamp)
+                    
+                    filtered_rows.append(fields)
+                    twitter_id = fields[0]
+                    hashtags = fields[10].split()
+                    sentiment_str = fields[8]
 
-            # 6 
-            positive_sentiment, negative_sentiment = map(int, sentiment_str.split())
-            overall_sentiment = positive_sentiment + negative_sentiment
-            sentiment_scores[twitter_id] = overall_sentiment
-            #print("Overall Sentiment Score:", overall_sentiment)
-            positive_sentiments.append(positive_sentiment)
-            negative_sentiments.append(negative_sentiment)
+                    # 6 
+                    positive_sentiment, negative_sentiment = map(int, sentiment_str.split())
+                    overall_sentiment = positive_sentiment + negative_sentiment
+                    sentiment_scores[twitter_id] = overall_sentiment
+                    #print("Overall Sentiment Score:", overall_sentiment)
+                    positive_sentiments.append(positive_sentiment)
+                    negative_sentiments.append(negative_sentiment)
 
-            for i, hashtag in enumerate(hashtags):
-                if hashtag != "null;":
-                    if hashtag in shared_hashtags:
-                        for shared_id in shared_hashtags[hashtag]:
-                            if shared_id != twitter_id:
-                                G.add_edge(twitter_id, shared_id)
-                                #print(f"Twitter IDs {twitter_id} and {shared_id} share hashtag: {hashtag}")
-                        shared_hashtags[hashtag].append(twitter_id)
-                    else:
-                        shared_hashtags[hashtag] = [twitter_id]
+                    for i, hashtag in enumerate(hashtags):
+                        if hashtag != "null;":
+                            if hashtag in shared_hashtags:
+                                for shared_id in shared_hashtags[hashtag]:
+                                    if shared_id != twitter_id:
+                                        G.add_edge(twitter_id, shared_id)
+                                        #print(f"Twitter IDs {twitter_id} and {shared_id} share hashtag: {hashtag}")
+                                shared_hashtags[hashtag].append(twitter_id)
+                            else:
+                                shared_hashtags[hashtag] = [twitter_id]
+                    line_num = 0
+                #else:
+                #    line_num += 1
+            number_of_lines += 1
 
-        number_of_lines += 1
-
-        # If we have read x lines, break the loop
-        if number_of_lines >= 1000:
-            break
+            # If we have read x lines, break the loop
+            if number_of_lines >= 30000:
+                break
+        
 
 #for row in filtered_rows:
 #    print(row)
@@ -74,7 +84,7 @@ print("Number of nodes:", num_nodes)
 print("Number of edges:", num_edges)
 
 # save the adjancency matrix
-adj_matrix = nx.to_numpy_array(G)
+#adj_matrix = nx.to_numpy_array(G)
 
 # 3
 largest_component = max(nx.connected_components(G), key=len)
@@ -90,8 +100,8 @@ third_largest_size = len(connected_components[2]) if len(connected_components) >
 print("Size of the second largest component:", second_largest_size)
 print("Size of the third largest component:", third_largest_size)
 
-avg_path_length = nx.average_shortest_path_length(largest_subgraph)
-print("Average path length of the largest component:", avg_path_length)
+#avg_path_length = nx.average_shortest_path_length(largest_subgraph)
+#print("Average path length of the largest component:", avg_path_length)
 
 # 4
 degree_centralities = nx.degree_centrality(G)
@@ -123,12 +133,13 @@ R, p = results.distribution_compare('power_law', 'lognormal')
 print("P-value:", p)
 
 # 7
-positive_positive_prop, negative_negative_prop, positive_negative_prop, negative_positive_prop = calculate_sentiment_connection_proportion(G, sentiment_scores)
+positive_positive_prop, negative_negative_prop, positive_negative_prop, negative_positive_prop, neutral_prop = calculate_sentiment_connection_proportion(G, sentiment_scores)
 
 print("Proportion of Positive-Positive Connections:", positive_positive_prop)
 print("Proportion of Negative-Negative Connections:", negative_negative_prop)
 print("Proportion of Positive-Negative Connections:", positive_negative_prop)
 print("Proportion of Negative-Positive Connections:", negative_positive_prop)
+print("Proportion of Neutral Connections:", neutral_prop)
 
 # 8
 min_timestamp = min(timestamps)
@@ -169,9 +180,10 @@ plt.show()
 
 # 9
 # Count negative sentiment tweets for each interval
+counts_per_interval = np.zeros(num_intervals)
 for timestamp, sentiment in zip(timestamps, negative_sentiments):
     interval_index = (timestamp - min_timestamp) // time_interval
-    counts_per_interval[interval_index] += sentiment
+    counts_per_interval[interval_index] -= sentiment
 
 # Plot the evolution of the total number of negative sentiment tweets over time
 time_points = [min_timestamp + i * time_interval for i in range(num_intervals)]
