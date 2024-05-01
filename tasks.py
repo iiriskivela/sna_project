@@ -147,15 +147,15 @@ max_timestamp = max(timestamps)
 time_interval = timedelta(days=1)  # 1 day interval
 num_intervals = (max_timestamp - min_timestamp) // time_interval + 1
 
-counts_per_interval = np.zeros(num_intervals)
+positive_counts_per_interval = np.zeros(num_intervals)
 
 # Count positive sentiment tweets for each interval
 for timestamp, sentiment in zip(timestamps, positive_sentiments):
     interval_index = (timestamp - min_timestamp) // time_interval
-    counts_per_interval[interval_index] += sentiment
+    positive_counts_per_interval[interval_index] += sentiment
 
 time_points = [min_timestamp + i * time_interval for i in range(num_intervals)]
-plt.plot(time_points, counts_per_interval)
+plt.plot(time_points, positive_counts_per_interval)
 plt.xlabel('Time')
 plt.ylabel('Total Number of Positive Sentiment Tweets')
 plt.title('Evolution of Positive Sentiment Tweets over Time')
@@ -168,10 +168,10 @@ plt.show()
 def polynomial_function(x, a, b, c):
     return a * x**2 + b * x + c
 
-popt, pcov = curve_fit(polynomial_function, np.arange(num_intervals), counts_per_interval)
+popt, pcov = curve_fit(polynomial_function, np.arange(num_intervals), positive_counts_per_interval)
 
 plt.plot(np.arange(num_intervals), polynomial_function(np.arange(num_intervals), *popt), 'r--')
-plt.scatter(np.arange(num_intervals), counts_per_interval)
+plt.scatter(np.arange(num_intervals), positive_counts_per_interval)
 plt.xlabel('Time Interval')
 plt.ylabel('Total Number of Positive Sentiment Tweets')
 plt.title('Fitted Polynomial Curve for Positive Sentiment Tweets')
@@ -180,14 +180,14 @@ plt.show()
 
 # 9
 # Count negative sentiment tweets for each interval
-counts_per_interval = np.zeros(num_intervals)
+negative_counts_per_interval = np.zeros(num_intervals)
 for timestamp, sentiment in zip(timestamps, negative_sentiments):
     interval_index = (timestamp - min_timestamp) // time_interval
-    counts_per_interval[interval_index] -= sentiment
+    negative_counts_per_interval[interval_index] -= sentiment
 
 # Plot the evolution of the total number of negative sentiment tweets over time
 time_points = [min_timestamp + i * time_interval for i in range(num_intervals)]
-plt.plot(time_points, counts_per_interval)
+plt.plot(time_points, negative_counts_per_interval)
 plt.xlabel('Time')
 plt.ylabel('Total Number of Negative Sentiment Tweets')
 plt.title('Evolution of Negative Sentiment Tweets over Time')
@@ -201,11 +201,11 @@ def polynomial_function(x, a, b, c):
     return a * x**2 + b * x + c
 
 # Fit the polynomial function to the data
-popt, pcov = curve_fit(polynomial_function, np.arange(num_intervals), counts_per_interval)
+popt, pcov = curve_fit(polynomial_function, np.arange(num_intervals), negative_counts_per_interval)
 
 # Plot the fitted curve
 plt.plot(np.arange(num_intervals), polynomial_function(np.arange(num_intervals), *popt), 'r--')
-plt.scatter(np.arange(num_intervals), counts_per_interval)
+plt.scatter(np.arange(num_intervals), negative_counts_per_interval)
 plt.xlabel('Time Interval')
 plt.ylabel('Total Number of Negative Sentiment Tweets')
 plt.title('Fitted Polynomial Curve for Negative Sentiment Tweets')
