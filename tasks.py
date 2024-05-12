@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 import powerlaw
 from sentimentfunction import calculate_sentiment_connection_proportion
 from scipy.optimize import curve_fit
+
+import ndlib.models.epidemics as ep
+import ndlib.models.ModelConfig as mc
 # 1
 # Jos testaa, pitää vaa muokata polku twitter dataan että löytyy
 
@@ -24,7 +27,8 @@ negative_sentiments = []
 
 line_num = 0
 
-with open(r'C:\Users\joh55\Downloads\TweetsCOV19.tsv\TweetsCOV19.tsv', 'rb') as f:
+with open(r'C:\Users\iinan\Downloads\TweetsCOV19.tsv\TweetsCOV19.tsv', 'rb') as f:
+#with open(r'C:\Users\joh55\Downloads\TweetsCOV19.tsv\TweetsCOV19.tsv', 'rb') as f:
 #with gzip.open(r'c:\Users\35844\Downloads\TweetsCOV19.tsv.gz', 'rb') as f:
     filtered_rows = []
     number_of_lines = 0
@@ -77,9 +81,10 @@ with open(r'C:\Users\joh55\Downloads\TweetsCOV19.tsv\TweetsCOV19.tsv', 'rb') as 
                 #    line_num += 1
             number_of_lines += 1
 
+            print(number_of_lines)
             # If we have read x lines, break the loop
-            #if number_of_lines >= 900000:
-            #    break
+            if number_of_lines >= 100000:
+                break
         
 
 #for row in filtered_rows:
@@ -140,6 +145,19 @@ print("Xmin (minimum value):", results.power_law.xmin)
 
 R, p = results.distribution_compare('power_law', 'lognormal')
 print("P-value:", p)
+
+plt.hist(degree_centralities_values, bins=20, alpha=0.7, density=True, label='Degree Centrality')
+plt.title("Degree Centrality Distribution with Power-law Fit")
+plt.xlabel("Degree Centrality")
+plt.ylabel("Density")
+plt.legend()
+
+#Piirtyy väärinpäin?????????
+x = np.linspace(min(degree_centralities_values), max(degree_centralities_values), 1000)
+y = (x ** results.alpha) * results.power_law.xmin ** (-results.power_law.alpha)
+plt.plot(x, y, color='red', linestyle='--', label='Power-law Fit')
+plt.legend()
+plt.show()
 
 # 7
 positive_positive_prop, negative_negative_prop, positive_negative_prop, negative_positive_prop, neutral_prop = calculate_sentiment_connection_proportion(G, sentiment_scores)
@@ -220,3 +238,19 @@ plt.ylabel('Total Number of Negative Sentiment Tweets')
 plt.title('Fitted Polynomial Curve for Negative Sentiment Tweets')
 plt.grid(True)
 plt.show()
+
+
+######10 tehtävä
+model = ep.SISModel(G)
+config = mc.Configuration()
+config.add_model_parameter('beta', 0.03)  # Transmission rate
+config.add_model_parameter('lambda', 0.1)  # Recovery rate
+model.set_initial_status(config)
+
+iterations = 10
+execution = model.iteration_bunch(iterations)
+
+# Specify initial infected nodes
+initial_infected_nodes = [list(G.nodes())[0], list(G.nodes())[1]]  # Example: select the first two nodes as initial infected ??
+
+config.add_model_initial_configuration("Infected", initial_infected_nodes)
