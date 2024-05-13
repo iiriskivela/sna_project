@@ -81,7 +81,7 @@ with open(r'C:\Users\iinan\Downloads\TweetsCOV19.tsv\TweetsCOV19.tsv', 'rb') as 
                 #    line_num += 1
             number_of_lines += 1
 
-            print(number_of_lines)
+            #print(number_of_lines)
             # If we have read x lines, break the loop
             if number_of_lines >= 100000:
                 break
@@ -146,17 +146,33 @@ print("Xmin (minimum value):", results.power_law.xmin)
 R, p = results.distribution_compare('power_law', 'lognormal')
 print("P-value:", p)
 
-plt.hist(degree_centralities_values, bins=20, alpha=0.7, density=True, label='Degree Centrality')
+""""plt.hist(degree_centralities_values, bins=20, alpha=0.7, density=True, label='Degree Centrality')
 plt.title("Degree Centrality Distribution with Power-law Fit")
 plt.xlabel("Degree Centrality")
 plt.ylabel("Density")
 plt.legend()
 
 #Piirtyy väärinpäin?????????
-x = np.linspace(min(degree_centralities_values), max(degree_centralities_values), 1000)
-y = (x ** results.alpha) * results.power_law.xmin ** (-results.power_law.alpha)
+x = np.linspace(0, max(degree_centralities_values), len(degree_centralities_values))
+y = (x ** results.power_law.alpha) * results.power_law.xmin ** (-results.power_law.alpha)
+
 plt.plot(x, y, color='red', linestyle='--', label='Power-law Fit')
 plt.legend()
+plt.show()"""
+
+plt.figure(figsize=(10, 6))
+plt.hist(degree_centralities_values, bins=30, density=True, alpha=0.7, color='b', label='Degree Centrality')
+
+# Plot the fitted power law distribution
+results.power_law.plot_pdf(color='r', linestyle='--', linewidth=2, label='Fitted Power Law')
+
+# Add labels and legend
+plt.xlabel('Degree Centrality')
+plt.ylabel('Probability Density')
+plt.title('Degree Centrality Distribution with Power Law Fit')
+plt.legend()
+
+# Show the plot
 plt.show()
 
 # 7
@@ -251,6 +267,16 @@ iterations = 10
 execution = model.iteration_bunch(iterations)
 
 # Specify initial infected nodes
-initial_infected_nodes = [list(G.nodes())[0], list(G.nodes())[1]]  # Example: select the first two nodes as initial infected ??
+initial_infected_nodes = [list(G.nodes())[0], list(G.nodes())[1]]  #mitkä pitää laittaa infected
 
 config.add_model_initial_configuration("Infected", initial_infected_nodes)
+
+#tää ei välttis vielä toimi
+infected_nodes = model.get_infected_nodes()
+total_negative_sentiments = len(infected_nodes)
+print("Total Negative Sentiments:", total_negative_sentiments)
+
+# Plot the network with infected nodes highlighted
+pos = nx.spring_layout(G)  # Define layout for visualization
+nx.draw(G, pos, node_color=['red' if node in infected_nodes else 'blue' for node in G.nodes()], with_labels=True)
+plt.show()
