@@ -152,28 +152,23 @@ plt.xlabel("Degree Centrality")
 plt.ylabel("Density")
 plt.legend()
 
-#Piirtyy väärinpäin?????????
 x = np.linspace(0, max(degree_centralities_values), len(degree_centralities_values))
 y = (x ** results.power_law.alpha) * results.power_law.xmin ** (-results.power_law.alpha)
 
 plt.plot(x, y, color='red', linestyle='--', label='Power-law Fit')
 plt.legend()
-plt.show()"""
+plt.show()
 
 plt.figure(figsize=(10, 6))
 plt.hist(degree_centralities_values, bins=30, density=True, alpha=0.7, color='b', label='Degree Centrality')
 
-# Plot the fitted power law distribution
 results.power_law.plot_pdf(color='r', linestyle='--', linewidth=2, label='Fitted Power Law')
 
-# Add labels and legend
 plt.xlabel('Degree Centrality')
 plt.ylabel('Probability Density')
 plt.title('Degree Centrality Distribution with Power Law Fit')
 plt.legend()
-
-# Show the plot
-plt.show()
+plt.show()"""
 
 # 7
 positive_positive_prop, negative_negative_prop, positive_negative_prop, negative_positive_prop, neutral_prop = calculate_sentiment_connection_proportion(G, sentiment_scores)
@@ -256,8 +251,8 @@ plt.grid(True)
 plt.show()
 
 
-######10 tehtävä
-model = ep.SISModel(G)
+# 10
+"""model = ep.SISModel(G)
 config = mc.Configuration()
 config.add_model_parameter('beta', 0.03)  # Transmission rate
 config.add_model_parameter('lambda', 0.1)  # Recovery rate
@@ -267,11 +262,10 @@ iterations = 10
 execution = model.iteration_bunch(iterations)
 
 # Specify initial infected nodes
-initial_infected_nodes = [list(G.nodes())[0], list(G.nodes())[1]]  #mitkä pitää laittaa infected
+initial_infected_nodes = [list(G.nodes())[0], list(G.nodes())[1]] 
 
 config.add_model_initial_configuration("Infected", initial_infected_nodes)
 
-#tää ei välttis vielä toimi
 infected_nodes = model.get_infected_nodes()
 total_negative_sentiments = len(infected_nodes)
 print("Total Negative Sentiments:", total_negative_sentiments)
@@ -279,4 +273,4 @@ print("Total Negative Sentiments:", total_negative_sentiments)
 # Plot the network with infected nodes highlighted
 pos = nx.spring_layout(G)  # Define layout for visualization
 nx.draw(G, pos, node_color=['red' if node in infected_nodes else 'blue' for node in G.nodes()], with_labels=True)
-plt.show()
+plt.show()"""
